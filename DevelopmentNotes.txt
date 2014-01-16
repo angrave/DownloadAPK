@@ -13,6 +13,7 @@ git push -u origin master
 
 
 Manual Testing:
+Test with no SD Card
 Test with a real APK url
 Test with an incorrect url (e.g. extra character in path)
 Test with a malformed url (e.g. httttp://blah
