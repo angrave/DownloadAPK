@@ -1,0 +1,8 @@
+
+cd apps101workspace/DownloadAPK-v1
+git init
+echo bin/ >> .gitignore 
+git add -A 
+git commit -m "Initial Import"
+git remote add origin https://github.com/angrave/DownloadAPK.git
+git push -u origin master
