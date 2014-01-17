@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -63,8 +64,13 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements TextWatcher {
 	public static final String TAG = "MainActivity";
 
+	// The flags should be set to false for production
+	// Set to true to test writing too many bytes to the SD Card or to make the download take
+	// at least 5 seconds.
 	public static final boolean TEST_INSUFFICIENT_SPACE = false;
-
+	public static final boolean TEST_SLOW_DOWNLOAD = false;
+	
+	
 	private static final String FILE_NAME = "CourseraPeerGrading.apk";
 	private File mRoot, mDir, mOutputFile;
 
@@ -180,7 +186,7 @@ public class MainActivity extends Activity implements TextWatcher {
 	 */
 	public void initializeDownload(View view) {
 
-		if (mUrl.toString().length()> 0) {
+		if (mUrl.toString().length() > 0) {
 			Log.i(TAG, "Downloading: " + mUrl);
 			new DownloadAPK().execute(mUrl);
 		}
@@ -223,6 +229,7 @@ public class MainActivity extends Activity implements TextWatcher {
 			OutputStream output = null;
 			HttpURLConnection connection = null;
 			int totalBytesDownloaded = 0;
+			URL url = downloadURL[0];
 
 			try {
 				String storageReady = prepareStorage(); // Check storage is
@@ -230,7 +237,6 @@ public class MainActivity extends Activity implements TextWatcher {
 				if (!storageReady.isEmpty())
 					throw new Exception(storageReady);
 
-				URL url = downloadURL[0];
 				Log.d(TAG, "Opening: " + url);
 				publishProgress("Opening " + url + " ...");
 				connection = (HttpURLConnection) url.openConnection();
@@ -247,13 +253,17 @@ public class MainActivity extends Activity implements TextWatcher {
 				input = new BufferedInputStream(url.openStream(), BUFFER_SIZE);
 				output = new FileOutputStream(mOutputFile);
 
+				byte[] buffer = new byte[BUFFER_SIZE];
+
 				if (TEST_INSUFFICIENT_SPACE) {
 					publishProgress("Writing an infinite number of bytes...");
 					while (true)
-						output.write('a');
+						output.write(buffer);
 				}
-				byte[] buffer = new byte[BUFFER_SIZE];
-
+				if(TEST_SLOW_DOWNLOAD) {
+					publishProgress("Pausing for 5 seconds...");
+					Thread.sleep(5000);
+				}
 				long time = 0;
 				int byteCount;
 
@@ -277,11 +287,18 @@ public class MainActivity extends Activity implements TextWatcher {
 				output = null; // Every byte has been saved
 				result = ""; // Only now can we declare success!
 				publishProgress("");
+			} catch (UnknownHostException hue) {
+				result = "Unknown host " + url.getHost();
 			} catch (Exception e) {
 				Log.e(TAG, "Exception: ", e);
-				mOutputFile.delete(); // Delete the partially complete file
-				result = responseCode + ":" + e.getMessage();
+
+				result = e.getClass().getSimpleName().replace("Exception", " ");
+				if (responseCode != 0 && responseCode/100 != 2)
+					result += "(" + responseCode + ")";
+				result += e.getMessage();
 			} finally {
+				if (!result.isEmpty())
+					mOutputFile.delete(); // Delete the partially complete file
 				try {
 					if (output != null) {
 						output.close();
