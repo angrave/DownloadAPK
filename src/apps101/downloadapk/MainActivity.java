@@ -288,8 +288,13 @@ public class MainActivity extends Activity implements TextWatcher {
 				while ((byteCount = input.read(buffer)) != -1) {
 					if (isCancelled())
 						throw new Exception("Cancelled");
-
+					
 					output.write(buffer, 0, byteCount);
+					if(totalBytesDownloaded ==0 && byteCount>3 ) {
+						// Check first first four bytes are (hex) 50,4b,03,04, (zip header)
+						if(buffer[0]!=0x50 ||  buffer[1]!=0x4b || buffer[2]!= 0x03 ||buffer[2]!= 0x04 )
+							throw new Exception("Not a valid apk file");
+					}
 					totalBytesDownloaded += byteCount;
 
 					long t = SystemClock.uptimeMillis();
