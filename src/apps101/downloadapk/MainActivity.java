@@ -65,18 +65,20 @@ public class MainActivity extends Activity implements TextWatcher {
 	public static final String TAG = "MainActivity";
 
 	// The flags should be set to false for production
-	// Set to true to test writing too many bytes to the SD Card or to make the download take
+	// Set to true to test writing too many bytes to the SD Card or to make the
+	// download take
 	// at least 5 seconds.
 	public static final boolean TEST_INSUFFICIENT_SPACE = false;
 	public static final boolean TEST_SLOW_DOWNLOAD = false;
-	
-	
+
 	private static final String FILE_NAME = "CourseraPeerGrading.apk";
 	private File mRoot, mDir, mOutputFile;
 
 	private Button mDownloadButton;
 	private EditText mEditText;
 	private URL mUrl;
+
+	private AsyncTask<URL, String, String> mDownloader;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -111,6 +113,15 @@ public class MainActivity extends Activity implements TextWatcher {
 			Toast.makeText(this, error, Toast.LENGTH_LONG).show();
 			finish();
 		}
+	}
+
+	@Override
+	protected void onStop() {
+		if (mDownloader != null) {
+			mDownloader.cancel(true);
+			mDownloader = null;
+		}
+		super.onStop();
 	}
 
 	/**
@@ -188,7 +199,7 @@ public class MainActivity extends Activity implements TextWatcher {
 
 		if (mUrl.toString().length() > 0) {
 			Log.i(TAG, "Downloading: " + mUrl);
-			new DownloadAPK().execute(mUrl);
+			mDownloader = new DownloadAPK().execute(mUrl);
 		}
 	}
 
@@ -244,9 +255,16 @@ public class MainActivity extends Activity implements TextWatcher {
 				connection.connect();
 
 				responseCode = connection.getResponseCode();
-				publishProgress("Connected (" + responseCode + ")");
-
 				Log.d(TAG, "Response Code:" + responseCode);
+
+				if (responseCode == 200) {
+					publishProgress("Connected");
+				} else {
+					result = "Server replied " + responseCode + ":"
+							+ connection.getResponseMessage();
+					publishProgress(result);
+					return result;
+				}
 
 				// We connected, so try to open the connection stream and save
 				// bytes to the SD Card
@@ -260,7 +278,7 @@ public class MainActivity extends Activity implements TextWatcher {
 					while (true)
 						output.write(buffer);
 				}
-				if(TEST_SLOW_DOWNLOAD) {
+				if (TEST_SLOW_DOWNLOAD) {
 					publishProgress("Pausing for 5 seconds...");
 					Thread.sleep(5000);
 				}
@@ -293,7 +311,7 @@ public class MainActivity extends Activity implements TextWatcher {
 				Log.e(TAG, "Exception: ", e);
 
 				result = e.getClass().getSimpleName().replace("Exception", " ");
-				if (responseCode != 0 && responseCode/100 != 2)
+				if (responseCode != 0 && responseCode / 100 != 2)
 					result += "(" + responseCode + ")";
 				result += e.getMessage();
 			} finally {
