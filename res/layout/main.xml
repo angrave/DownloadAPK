@@ -5,12 +5,12 @@
     android:layout_height="fill_parent"
     tools:context=".MainActivity">
   
-    <AutoCompleteTextView
-        android:id="@+id/edittext_url"
+    <EditText
+        android:id="@+id/edittext"
         android:hint="@string/address_apk"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions|textUri"
+        android:inputType="textNoSuggestions|textVisiblePassword"
         android:selectAllOnFocus="true"
         android:completionThreshold="9999"
         />

@@ -19,3 +19,11 @@ Test with a real APK url
 Test with an incorrect url (e.g. extra character in path)
 Test with a malformed url (e.g. httttp://blah
 
+
+Notes on no-suggestions - 
+http://stackoverflow.com/questions/6281514/android-programmatically-disable-autocomplete-autosuggest-for-edittext-in-emulat
+http://stackoverflow.com/questions/1959576/turn-off-autosuggest-for-edittext
+http://stackoverflow.com/questions/10416931/android-edittext-what-inputtype-to-avoid-text-suggestions
+http://stackoverflow.com/questions/2653271/android-multiline-no-autosuggest-in-edittext
+android:inputType="textVisiblePassword" for 2.2
+"I used android:inputType="textNoSuggestions|textVisiblePassword" because it looks like the first one is not in all vendor builds of android "

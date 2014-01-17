@@ -93,7 +93,7 @@ public class MainActivity extends Activity implements TextWatcher {
 		setContentView(R.layout.main);
 
 		mDownloadButton = (Button) findViewById(R.id.button_download);
-		mEditText = (EditText) findViewById(R.id.edittext_url);
+		mEditText = (EditText) findViewById(R.id.edittext);
 		mEditText.addTextChangedListener(this);
 
 		// You can set a default URL to download here -
