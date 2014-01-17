@@ -65,7 +65,7 @@ public class MainActivity extends Activity implements TextWatcher {
 	public static final String TAG = "MainActivity";
 
 	
-	// You can add a default URL here=
+	// If you already know a default URL to use, you can set it here...
 	public static final String DEFAULT_URL="";
 	
 	
@@ -107,7 +107,7 @@ public class MainActivity extends Activity implements TextWatcher {
 
 		// Some Basic Sanity Checks about our environment
 		// If we don't have connectivity and a mounted, writeable SD Card then
-		// display an error message and quit
+		// display an error message and quit 
 		String error = checkStorage();
 		if (error.length() > 0) {
 			Toast.makeText(this, error, Toast.LENGTH_LONG).show();
@@ -122,6 +122,8 @@ public class MainActivity extends Activity implements TextWatcher {
 
 	@Override
 	protected void onStop() {
+		// When we stop we also cancel the download
+		// If we wanted to perform a background download we should consider using a service
 		if (mDownloader != null) {
 			mDownloader.cancel(true);
 			mDownloader = null;
@@ -224,7 +226,7 @@ public class MainActivity extends Activity implements TextWatcher {
 	}
 
 	/**
-	 * Async task to download and install the APK
+	 * The Async task to download and install the APK
 	 * 
 	 */
 	public class DownloadAPK extends AsyncTask<URL, String, String> {
@@ -297,7 +299,7 @@ public class MainActivity extends Activity implements TextWatcher {
 					output.write(buffer, 0, byteCount);
 					if (totalBytesDownloaded == 0 && byteCount > 3) {
 						// Check first first four bytes are (hex) 50,4b,03,04,
-						// (zip header)
+						// (apks are zip files, so we know what their first 4 bytes should be)
 						if (buffer[0] != 0x50 || buffer[1] != 0x4b
 								|| buffer[2] != 0x03 || buffer[3] != 0x04) {
 							Log.e(TAG,"Buffer:"+(char)buffer[0]+","+(char)buffer[1]+","+buffer[2]+","+buffer[3]);
