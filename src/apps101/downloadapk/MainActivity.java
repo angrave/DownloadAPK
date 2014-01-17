@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import android.app.Activity;
@@ -45,8 +46,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -56,13 +60,17 @@ import android.widget.Toast;
  * and install it.
  * 
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements TextWatcher {
 	public static final String TAG = "MainActivity";
+
+	public static final boolean TEST_INSUFFICIENT_SPACE = false;
 
 	private static final String FILE_NAME = "CourseraPeerGrading.apk";
 	private File mRoot, mDir, mOutputFile;
 
+	private Button mDownloadButton;
 	private EditText mEditText;
+	private URL mUrl;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -71,7 +79,9 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		mDownloadButton = (Button) findViewById(R.id.button_download);
 		mEditText = (EditText) findViewById(R.id.edittext_url);
+		mEditText.addTextChangedListener(this);
 
 		// You can set a default URL to download here -
 		mEditText.setText("");
@@ -169,11 +179,10 @@ public class MainActivity extends Activity {
 	 * @param view
 	 */
 	public void initializeDownload(View view) {
-		String retrieveURL = mEditText.getText().toString().trim();
 
-		if (retrieveURL.length() > 0) {
-			Log.i(TAG, "Downloading from: " + retrieveURL);
-			new DownloadAPK().execute(retrieveURL);
+		if (mUrl.toString().length()> 0) {
+			Log.i(TAG, "Downloading: " + mUrl);
+			new DownloadAPK().execute(mUrl);
 		}
 	}
 
@@ -196,7 +205,7 @@ public class MainActivity extends Activity {
 	 * Async task to download and install the APK
 	 * 
 	 */
-	public class DownloadAPK extends AsyncTask<String, String, String> {
+	public class DownloadAPK extends AsyncTask<URL, String, String> {
 		private static final int BUFFER_SIZE = 8192;
 		private ProgressDialog mDialog;
 
@@ -205,7 +214,7 @@ public class MainActivity extends Activity {
 			mDialog.show();
 		}
 
-		protected String doInBackground(String... downloadURL) {
+		protected String doInBackground(URL... downloadURL) {
 			String result = "Incomplete"; // Will be empty once the entire file
 											// is downloaded
 			int responseCode = 0; // Server response code (e.g. 200=OK;
@@ -221,7 +230,7 @@ public class MainActivity extends Activity {
 				if (!storageReady.isEmpty())
 					throw new Exception(storageReady);
 
-				URL url = new URL(downloadURL[0]);
+				URL url = downloadURL[0];
 				Log.d(TAG, "Opening: " + url);
 				publishProgress("Opening " + url + " ...");
 				connection = (HttpURLConnection) url.openConnection();
@@ -237,6 +246,12 @@ public class MainActivity extends Activity {
 				// bytes to the SD Card
 				input = new BufferedInputStream(url.openStream(), BUFFER_SIZE);
 				output = new FileOutputStream(mOutputFile);
+
+				if (TEST_INSUFFICIENT_SPACE) {
+					publishProgress("Writing an infinite number of bytes...");
+					while (true)
+						output.write('a');
+				}
 				byte[] buffer = new byte[BUFFER_SIZE];
 
 				long time = 0;
@@ -317,6 +332,34 @@ public class MainActivity extends Activity {
 
 			}
 		}
+	}
+
+	// TextWatcher interface
+	@Override
+	public void afterTextChanged(Editable s) {
+		boolean valid = false;
+		String address = mEditText.getText().toString().trim();
+		if (!address.isEmpty()) {
+			if (address.indexOf(':') == -1)
+				address = "http://" + address;
+			try {
+				mUrl = new URL(address);
+				valid = true;
+			} catch (MalformedURLException e) {
+			}
+		}
+		mDownloadButton.setEnabled(valid);
+	}
+
+	// TextWatcher interface
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+	}
+
+	// TextWatcher interface
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
 
 }
