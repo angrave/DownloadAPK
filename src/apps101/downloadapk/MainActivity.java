@@ -64,6 +64,11 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements TextWatcher {
 	public static final String TAG = "MainActivity";
 
+	
+	// You can add a default URL here=
+	public static final String DEFAULT_URL="";
+	
+	
 	// The flags should be set to false for production
 	// Set to true to test writing too many bytes to the SD Card or to make the
 	// download take
@@ -92,7 +97,7 @@ public class MainActivity extends Activity implements TextWatcher {
 		mEditText.addTextChangedListener(this);
 
 		// You can set a default URL to download here -
-		mEditText.setText("https://s3.amazonaws.com/coursera-uploads/user-c8d4dafd61ae151e560584d0/1/asst-6/0f22ac007a3611e3bd24b7b89f8f494c.apk");
+		mEditText.setText(DEFAULT_URL);
 
 		// We download the APK into a public readable directory - the external
 		// storage area
