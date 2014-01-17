@@ -10,7 +10,7 @@
         android:hint="@string/address_apk"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:inputType="textNoSuggestions"
+        android:inputType="textNoSuggestions|textUri"
         android:selectAllOnFocus="true"
         android:completionThreshold="9999"
         />

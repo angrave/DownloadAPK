@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Download APK</string>
-    <string name="string_download_apk">Download the APK</string>
+    <string name="string_download_apk">Download and install</string>
     <string name="address_apk">http://(&#8230;)address(&#8230;).apk</string>
 </resources>
