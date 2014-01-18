@@ -88,8 +88,8 @@ public class MainActivity extends Activity implements TextWatcher {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
+		Log.d(TAG, "onCreate");
 		setContentView(R.layout.main);
 
 		mDownloadButton = (Button) findViewById(R.id.button_download);
@@ -122,13 +122,14 @@ public class MainActivity extends Activity implements TextWatcher {
 
 	@Override
 	protected void onStop() {
+		super.onStop();
+		Log.d(TAG,"onStop");
 		// When we stop we also cancel the download
 		// If we wanted to perform a background download we should consider using a service
 		if (mDownloader != null) {
 			mDownloader.cancel(true);
 			mDownloader = null;
 		}
-		super.onStop();
 	}
 
 	/**
